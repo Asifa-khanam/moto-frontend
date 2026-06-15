@@ -284,37 +284,43 @@ html = """<!DOCTYPE html>
     }
 
     async function submitInventory() {
+        const nameEl = document.getElementById('part-name').value;
+        const codeEl = document.getElementById('part-code').value;
+
+        // 1. Prevent blank submissions
+        if(!nameEl || !codeEl) {
+            alert("⚠️ Please fill out at least the Part Name and Part Code!");
+            return;
+        }
+
         const payload = {
-            part_name: document.getElementById('part-name').value,
-            part_code: document.getElementById('part-code').value,
-            category: document.getElementById('part-cat').value,
+            part_name: nameEl,
+            part_code: codeEl,
+            category: document.getElementById('part-cat').value || 'Uncategorized',
             cost_price: parseFloat(document.getElementById('part-price').value) || 0,
             available_units: parseInt(document.getElementById('part-qty').value) || 0,
             alert_limit: parseInt(document.getElementById('part-alert-limit').value) || 3
         };
+
         try {
             const response = await fetch(`${BACKEND_URL}/inventory`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+
             if(response.ok) {
                 document.getElementById('inventory-form').reset();
+                alert("✅ Part added to shelf successfully!");
                 syncStateWithPostgres();
+            } else {
+                // 2. Catch Database rule violations
+                alert("❌ Failed to add part. Ensure the Part Code is completely unique and not already in the ledger.");
             }
-        } catch (err) { alert("Network error connecting to Flask backend."); }
-    }
-
-    async function deletePart(code) {
-        if (!confirm(`Delete part code [${code}]?`)) return;
-        try {
-            await fetch(`${BACKEND_URL}/inventory/delete`, {
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ part_code: code })
-            });
-            syncStateWithPostgres();
-        } catch(err) { console.error(err); }
+        } catch (err) {
+            // 3. Catch Render wake-up delays
+            alert("⏳ Network error: The database server might be waking up from sleep. Wait 30 seconds and try clicking Add again.");
+        }
     }
 
     async function updateQty(code, change) {
