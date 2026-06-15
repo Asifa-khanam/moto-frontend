@@ -6,7 +6,7 @@ st.set_page_config(layout="wide", page_title="MotoFix Pro")
 st.title("MotoFix Pro-Hub")
 
 # Pulls your Render URL from Streamlit Secrets
-BACKEND_URL = os.environ.get("BACKEND_API_URL", "http://localhost:5000/api")
+BACKEND_URL = "https://moto-backend-akei.onrender.com/api"
 
 # Normal string, NO 'f' at the beginning
 html = """<!DOCTYPE html>
