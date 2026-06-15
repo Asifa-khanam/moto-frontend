@@ -121,82 +121,91 @@ html = """<!DOCTYPE html>
     const BACKEND_URL = "PYTHON_WILL_REPLACE_THIS";
 
     function switchTab(tabId){
+        // Hide all tabs
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+        
+        // Show the selected tab
         document.getElementById(tabId).classList.remove('hidden');
+        
+        // Reset all buttons 
         document.querySelectorAll('[id^="btn-tab"]').forEach(btn => {
             btn.classList.remove('bg-cyan-500', 'text-slate-950', 'shadow-md');
             btn.classList.add('text-slate-400');
         });
+        
+        // Highlight the clicked button
         const activeBtn = document.getElementById('btn-' + tabId);
         if(activeBtn) {
             activeBtn.classList.add('bg-cyan-500', 'text-slate-950', 'shadow-md');
         }
     }
 
-    function enterAppConsole() {{
+    function enterAppConsole() {
         document.getElementById('landing-page-view').classList.add('hidden');
         document.getElementById('main-app-dashboard-view').classList.remove('hidden');
         syncStateWithPostgres();
-    }}
+    }
 
-    async function syncStateWithPostgres() {{
-        try {{
-            const res = await fetch(`${{BACKEND_URL}}/inventory`);
+    async function syncStateWithPostgres() {
+        try {
+            const res = await fetch(`${BACKEND_URL}/inventory`);
             if (!res.ok) return console.error("Database connection failed");
             const allData = await res.json();
             populateLedgerTable(allData);
-        }} catch (err) {{ 
+        } catch (err) { 
             console.error("Network error:", err); 
-        }}
-    }}
+        }
+    }
 
-    function populateLedgerTable(items) {{
+    function populateLedgerTable(items) {
         const tbody = document.getElementById('ledger-table-body');
         tbody.innerHTML = items.map(item => `
             <tr class="hover:bg-slate-800/10 transition">
-                <td class="p-3.5 font-bold text-slate-200">${{item.part_name}}<br><span class="text-[10px] text-slate-500 font-mono">${{item.part_code}}</span></td>
-                <td class="p-3.5 text-slate-400 font-medium">${{item.category}}</td>
-                <td class="p-3.5 font-semibold text-slate-300">₹${{item.cost_price}}</td>
-                <td class="p-3.5 text-center font-bold text-amber-500 font-mono">${{item.alert_limit}}</td>
-                <td class="p-3.5 text-center font-black">${{item.available_units}}</td>
+                <td class="p-3.5 font-bold text-slate-200">${item.part_name}<br><span class="text-[10px] text-slate-500 font-mono">${item.part_code}</span></td>
+                <td class="p-3.5 text-slate-400 font-medium">${item.category}</td>
+                <td class="p-3.5 font-semibold text-slate-300">₹${item.cost_price}</td>
+                <td class="p-3.5 text-center font-bold text-amber-500 font-mono">${item.alert_limit}</td>
+                <td class="p-3.5 text-center font-black">${item.available_units}</td>
                 <td class="p-3.5 text-right space-x-3">
-                    <button onclick="deletePart('${{item.part_code}}')" class="text-rose-500 hover:text-rose-400 text-[10px] uppercase font-extrabold">Delete</button>
+                    <button onclick="deletePart('${item.part_code}')" class="text-rose-500 hover:text-rose-400 text-[10px] uppercase font-extrabold">Delete</button>
                 </td>
             </tr>
         `).join('');
-    }}
+    }
 
-    async function submitInventory() {{
-        const payload = {{
+    async function submitInventory() {
+        const payload = {
             part_name: document.getElementById('part-name').value,
             part_code: document.getElementById('part-code').value,
             category: document.getElementById('part-cat').value,
             cost_price: parseFloat(document.getElementById('part-price').value) || 0,
             available_units: parseInt(document.getElementById('part-qty').value) || 0,
             alert_limit: parseInt(document.getElementById('part-alert-limit').value) || 3
-        }};
-        try {{
-            const response = await fetch(`${{BACKEND_URL}}/inventory`, {{
+        };
+        try {
+            const response = await fetch(`${BACKEND_URL}/inventory`, {
                 method: 'POST',
-                headers: {{ 'Content-Type': 'application/json' }},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            }});
-            if(response.ok) {{
+            });
+            if(response.ok) {
                 document.getElementById('inventory-form').reset();
                 syncStateWithPostgres();
-            }}
-        }} catch (err) {{ alert("Network error connecting to Flask backend."); }}
-    }}
+            }
+        } catch (err) { 
+            alert("Network error connecting to Flask backend."); 
+        }
+    }
 
-    async function deletePart(code) {{
-        if (!confirm(`Delete part code [${{code}}]?`)) return;
-        await fetch(`${{BACKEND_URL}}/inventory/delete`, {{
+    async function deletePart(code) {
+        if (!confirm(`Delete part code [${code}]?`)) return;
+        await fetch(`${BACKEND_URL}/inventory/delete`, {
             method: 'POST', 
-            headers: {{ 'Content-Type': 'application/json' }},
-            body: JSON.stringify({{ part_code: code }})
-        }});
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ part_code: code })
+        });
         syncStateWithPostgres();
-    }}
+    }
     </script>
 </body>
 </html>"""
