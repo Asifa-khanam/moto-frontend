@@ -419,6 +419,32 @@ html = """<!DOCTYPE html>
         syncStateWithPostgres();
         loadBookings();
     });
+
+    async function deletePart(code) {
+    if (!confirm("Delete this part?")) return;
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/inventory/delete`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                part_code: code
+            })
+        });
+
+        if (response.ok) {
+            alert("Part deleted successfully!");
+            syncStateWithPostgres();
+        } else {
+            alert("Failed to delete part.");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Network error while deleting.");
+    }
+}
     </script>
 </body>
 </html>"""
