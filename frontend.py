@@ -9,7 +9,7 @@ st.title("MotoFix Pro-Hub")
 # When you deploy, add BACKEND_API_URL as an environment variable in Streamlit Cloud.
 BACKEND_URL = os.environ.get("BACKEND_API_URL", "http://localhost:5000/api")
 
-html = f"""<!DOCTYPE html>
+html = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -118,17 +118,19 @@ html = f"""<!DOCTYPE html>
 
     <script>
     // Dynamically inject the API URL defined in Streamlit
-    const BACKEND_URL = "{BACKEND_URL}";
+    const BACKEND_URL = "PYTHON_WILL_REPLACE_THIS";
 
     function switchTab(tabId){
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
         document.getElementById(tabId).classList.remove('hidden');
-        document.querySelectorAll('[id^="btn-tab"]').forEach(btn => {{
+        document.querySelectorAll('[id^="btn-tab"]').forEach(btn => {
             btn.classList.remove('bg-cyan-500', 'text-slate-950', 'shadow-md');
             btn.classList.add('text-slate-400');
-        }});
+        });
         const activeBtn = document.getElementById('btn-' + tabId);
-        if(activeBtn) activeBtn.classList.add('bg-cyan-500', 'text-slate-950', 'shadow-md');
+        if(activeBtn) {
+            activeBtn.classList.add('bg-cyan-500', 'text-slate-950', 'shadow-md');
+        }
     }
 
     function enterAppConsole() {{
